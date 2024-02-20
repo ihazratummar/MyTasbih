@@ -1,0 +1,13 @@
+package com.hazrat.mytasbih.model
+
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+
+@Entity(tableName = "tasbih_counter")
+data class TasbihCounterEntity (
+    @PrimaryKey
+    val id: Int = 1,
+    var totalCount: Int ,
+    var totalRound:Int
+)
