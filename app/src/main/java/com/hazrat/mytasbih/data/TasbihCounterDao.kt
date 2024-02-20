@@ -1,6 +1,7 @@
 package com.hazrat.mytasbih.data
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -16,6 +17,9 @@ interface TasbihCounterDao {
 
 
     @Query("SELECT * FROM tasbih_counter WHERE id = 1")
-    fun getAllTasbihCounter(): Flow<List<TasbihCounterEntity?>>
+    fun getTasbih(): Flow<List<TasbihCounterEntity>>
+
+    @Query("UPDATE tasbih_counter SET tasbihCount = 0 WHERE id = 1")
+    suspend fun resetTasbihCount()
 
 }

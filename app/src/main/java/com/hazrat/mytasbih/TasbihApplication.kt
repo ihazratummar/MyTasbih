@@ -1,4 +1,4 @@
-package com.hazrat.mytasbih.screen
+package com.hazrat.mytasbih
 
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp

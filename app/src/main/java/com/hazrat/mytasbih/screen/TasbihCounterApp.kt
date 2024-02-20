@@ -26,6 +26,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -50,20 +52,18 @@ import com.hazrat.mytasbih.util.vibrate
 
 @Composable
 fun TasbihCounterApp(viewModel: TasbihViewModel = hiltViewModel()) {
-    val myTasbihCounter by viewModel.tasbihCounter.collectAsState(null)
-    val tasbih = myTasbihCounter?.first()
+    val myTasbihCounter by viewModel.tasbihCounter.collectAsState(initial = emptyList())
+    val tasbih = myTasbihCounter.firstOrNull()
 
 
     var selectedPhrase by remember { mutableStateOf(tasbihPhraseList[0]) }
-    var repeatCount by remember { mutableIntStateOf(33) } // Start from 1 initially
-    var tasbihCount by remember { mutableIntStateOf(0) }
-    var totalCount by remember { mutableStateOf(tasbih?.totalCount ?: 0) }
-    var totalRound by remember { mutableStateOf(tasbih?.totalRound ?: 0) }
+    var repeatCount by remember { mutableIntStateOf(33) } // Start from 33 initially
+    var tasbihCount by remember { mutableIntStateOf(tasbih?.tasbihCount?:1) }
+    var totalCount by remember { mutableIntStateOf(tasbih?.totalCount?:1) }
     var roundCount by remember { mutableIntStateOf(0) }
     var isDialogOpen by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val vibrator = remember { context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator }
-
 
 
     Scaffold(
@@ -85,7 +85,7 @@ fun TasbihCounterApp(viewModel: TasbihViewModel = hiltViewModel()) {
                             .height(200.dp)
                             .clickable {
                                 selectedPhrase = phrase
-                                tasbihCount = 0
+                                viewModel.resetTasbihCount()
                             },
                         elevation = CardDefaults.cardElevation(4.dp),
                         colors = CardDefaults.cardColors(
@@ -120,7 +120,8 @@ fun TasbihCounterApp(viewModel: TasbihViewModel = hiltViewModel()) {
             Spacer(modifier = Modifier.height(16.dp))
             Column {
 
-                Row(verticalAlignment = Alignment.CenterVertically,
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {
 
@@ -129,22 +130,11 @@ fun TasbihCounterApp(viewModel: TasbihViewModel = hiltViewModel()) {
                             .weight(1f)
                             .padding(5.dp)
                     ) {
-                        if (tasbih != null) {
-                            Text("Total Count: ${tasbih.totalCount}",
-                                modifier = Modifier
-                                    .padding(5.dp))
-                        }
-                    }
-                    Card(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(5.dp)
-                    ) {
-                        if (tasbih != null) {
-                            Text("Total Round: ${tasbih.totalRound}",
-                                modifier = Modifier
-                                    .padding(5.dp))
-                        }
+                        Text(
+                            "Total Count: ${tasbih?.totalCount}",
+                            modifier = Modifier
+                                .padding(5.dp)
+                        )
                     }
                 }
                 Row(
@@ -159,18 +149,23 @@ fun TasbihCounterApp(viewModel: TasbihViewModel = hiltViewModel()) {
                             .padding(5.dp)
                             .clickable { isDialogOpen = true },
                     ) {
-                        Text("Set Count: $repeatCount",modifier = Modifier
-                            .padding(5.dp))
+                        Text(
+                            "Set Count: $repeatCount", modifier = Modifier
+                                .padding(5.dp)
+                        )
                     }
 
                     // Round Counter
-                    Card(modifier = Modifier
-                        .padding(5.dp)
-                        .weight(1f)
+                    Card(
+                        modifier = Modifier
+                            .padding(5.dp)
+                            .weight(1f)
                     ) {
-                        Text("Round: $roundCount",
+                        Text(
+                            "Round: $roundCount",
                             modifier = Modifier
-                                .padding(5.dp))
+                                .padding(5.dp)
+                        )
                     }
                 }
             }
@@ -187,20 +182,28 @@ fun TasbihCounterApp(viewModel: TasbihViewModel = hiltViewModel()) {
 
                 Button(
                     onClick = {
+
                         if (tasbih != null) {
                             viewModel.insertTasbih(
                                 TasbihCounterEntity(
+                                    totalCount = tasbih.totalCount + 1,
+                                    tasbihCount = tasbih.tasbihCount + 1
+                                )
+                            )
+                        }else{
+                            viewModel.insertTasbih(
+                                TasbihCounterEntity(
                                     totalCount = totalCount,
-                                    totalRound = totalRound
+                                    tasbihCount = tasbihCount
                                 )
                             )
                         }
+
                         totalCount++
                         tasbihCount++
                         if (tasbihCount % repeatCount == 0) {
-                            totalRound++
                             roundCount++
-                            tasbihCount = 0 // Reset total count
+                            viewModel.resetTasbihCount()
                         }
                         vibrate(vibrator!!)
                     },
@@ -216,7 +219,7 @@ fun TasbihCounterApp(viewModel: TasbihViewModel = hiltViewModel()) {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "$tasbihCount / $repeatCount",
+                            text = "${tasbih?.tasbihCount} / $repeatCount",
                             style = TextStyle(
                                 fontWeight = FontWeight.SemiBold,
                                 fontSize = 50.sp,
@@ -224,7 +227,7 @@ fun TasbihCounterApp(viewModel: TasbihViewModel = hiltViewModel()) {
                             )
                         )
                         Spacer(modifier = Modifier.height(16.dp))
-                        if (tasbihCount == 0) Text(
+                        if (tasbih?.tasbihCount == 0) Text(
                             "Click to Start", color = Color.White,
                             style = MaterialTheme.typography.headlineSmall,
                         )
@@ -240,7 +243,7 @@ fun TasbihCounterApp(viewModel: TasbihViewModel = hiltViewModel()) {
             // Reset Button
             Button(
                 onClick = {
-                    tasbihCount = 0
+                    viewModel.resetTasbihCount()
                     roundCount = 0
                 },
                 modifier = Modifier
@@ -264,7 +267,6 @@ fun TasbihCounterApp(viewModel: TasbihViewModel = hiltViewModel()) {
         }
     }
 }
-
 
 
 @Preview(

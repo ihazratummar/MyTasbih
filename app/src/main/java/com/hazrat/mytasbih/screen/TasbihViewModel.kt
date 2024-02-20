@@ -17,15 +17,20 @@ import javax.inject.Inject
 @HiltViewModel
 class TasbihViewModel @Inject constructor(
     private val repository: TasbihRepository,
-): ViewModel() {
+) : ViewModel() {
 
     val tasbihCounter: Flow<List<TasbihCounterEntity?>> = repository.getTasbih()
 
-    fun insertTasbih(tasbihCounterEntity: TasbihCounterEntity){
+    fun insertTasbih(tasbihCounterEntity: TasbihCounterEntity) {
         viewModelScope.launch {
             repository.insertTasbih(tasbihCounterEntity)
-   }
         }
     }
 
+    fun resetTasbihCount(){
+        viewModelScope.launch {
+            repository.resetTasbihCount()
+        }
+    }
 }
+

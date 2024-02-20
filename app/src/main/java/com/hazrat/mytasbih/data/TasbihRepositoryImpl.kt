@@ -11,7 +11,11 @@ class TasbihRepositoryImpl(
     }
 
     override fun getTasbih(): Flow<List<TasbihCounterEntity?>> {
-       return dao.getAllTasbihCounter()
+       return dao.getTasbih()
+    }
+
+    override suspend fun resetTasbihCount() {
+        dao.resetTasbihCount()
     }
 
 

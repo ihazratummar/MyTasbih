@@ -8,6 +8,6 @@ import androidx.room.PrimaryKey
 data class TasbihCounterEntity (
     @PrimaryKey
     val id: Int = 1,
-    var totalCount: Int ,
-    var totalRound:Int
+    var totalCount: Int = 1,
+    var tasbihCount:Int = 0
 )

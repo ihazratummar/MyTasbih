@@ -9,4 +9,5 @@ interface TasbihRepository {
 
     fun getTasbih(): Flow<List<TasbihCounterEntity?>>
 
+    suspend fun resetTasbihCount()
 }

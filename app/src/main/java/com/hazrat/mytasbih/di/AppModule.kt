@@ -16,7 +16,6 @@ import javax.inject.Singleton
 object AppModule {
 
     @Provides
-    @Singleton
     fun provideTasbihDatabase(app:Application): TasbihDatabase{
         return Room.databaseBuilder(
             app,
